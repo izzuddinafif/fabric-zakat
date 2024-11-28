@@ -17,7 +17,7 @@ This project implements a blockchain network for managing and tracking Zakat tra
 
 4. Run the demo:
 ```bash
-./demo.sh
+./scripts/demo/demo.sh
 ```
 
 ## Prerequisites
@@ -113,10 +113,12 @@ This will:
 - Test endorsement policies
 
 ### Cleanup
-The script now performs cleanup only in the event of a failure. This ensures that the network remains up for further testing if the script completes successfully. If you need to manually clean up resources, you can run the cleanup function separately.
 
-### Error Handling
-A trap is set up to handle errors and perform cleanup if the script exits with a non-zero status.
+To stop and clean up the network:
+```bash
+cd scripts/demo
+./00_cleanup.sh
+```
 
 ### Troubleshooting
 
