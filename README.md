@@ -1,4 +1,4 @@
-# Fabric Zakat Network
+# Fabric Zakat Network (v1.0.0-rc1)
 
 A Hyperledger Fabric blockchain network for managing Zakat transactions between YDSF Malang and YDSF Jatim organizations.
 
@@ -6,7 +6,15 @@ A Hyperledger Fabric blockchain network for managing Zakat transactions between 
 
 This project implements a blockchain network for managing and tracking Zakat transactions. It enables transparent recording of Zakat collection and distribution between multiple organizations.
 
-## Quick Start
+### Status: Release Candidate
+
+This is a release candidate (RC) version where:
+- Chaincode implementation is feature-complete and tested
+- Basic network setup scripts are provided
+- Network scripts are for development/testing only
+- Production deployment requires additional security hardening
+
+## Quick Start (Development)
 
 1. Install prerequisites
 2. Clone the repository
@@ -15,10 +23,12 @@ This project implements a blockchain network for managing and tracking Zakat tra
 ./install-fabric.sh
 ```
 
-4. Run the demo:
+4. Run the development demo:
 ```bash
 ./scripts/demo/demo.sh
 ```
+
+Note: These scripts are for development and testing purposes. For production deployment, follow Hyperledger Fabric's official guidelines.
 
 ## Prerequisites
 
@@ -72,6 +82,59 @@ fabric-zakat/
 └── install-fabric.sh   # Fabric installation script
 ```
 
+## Zakat Chaincode (v1.0.0-rc1)
+
+The Zakat chaincode provides a robust implementation for managing Zakat transactions on the Hyperledger Fabric network. It supports the following operations:
+
+### Key Features
+
+- **Initialize Ledger**: Bootstrap the ledger with initial Zakat data
+- **Add Zakat**: Record new Zakat transactions with comprehensive validation
+- **Query Zakat**: Retrieve specific Zakat transaction details
+- **Get All Zakat**: List all recorded Zakat transactions
+- **Distribute Zakat**: Track Zakat distribution to beneficiaries
+- **Validate Transactions**: Comprehensive validation for all operations
+
+### Data Model
+
+```go
+type Zakat struct {
+    ID            string  `json:"ID"`           // Format: ZKT-ORG-YYYYMM-NNNN
+    Muzakki       string  `json:"muzakki"`      // Zakat payer
+    Amount        float64 `json:"amount"`       // Zakat amount
+    Type          string  `json:"type"`         // maal/fitrah
+    Status        string  `json:"status"`       // collected/distributed
+    Organization  string  `json:"organization"` // YDSF Malang/YDSF Jatim
+    Timestamp     string  `json:"timestamp"`    // ISO 8601 format
+    Mustahik      string  `json:"mustahik"`     // Zakat recipient
+    Distribution  float64 `json:"distribution"` // Distributed amount
+    DistributedAt string  `json:"distributedAt"`// Distribution timestamp
+}
+```
+
+### Validation Rules
+
+- **Zakat ID**: Must follow format `ZKT-ORG-YYYYMM-NNNN`
+- **Amount**: Must be positive
+- **Type**: Must be either 'maal' or 'fitrah'
+- **Organization**: Must be either 'YDSF Malang' or 'YDSF Jatim'
+- **Timestamps**: Must be in ISO 8601 format
+- **Status**: Automatically managed (collected → distributed)
+
+### Testing
+
+The chaincode includes comprehensive test coverage:
+- Unit tests for all functions
+- Error scenario testing
+- Mock-based testing
+- Table-driven tests
+
+To run tests:
+```bash
+cd chaincode/zakat
+go test -v
+```
+
 ## Development Guide
 
 ### Environment Setup
@@ -82,7 +145,7 @@ fabric-zakat/
    - OpenSSL
    - Git
 
-2. **Source environment variables**: The `env.sh` script contains the necessary environment variables. Simply source it to set up your environment:
+2. **Source environment variables**: The `env.sh` script contains the necessary environment variables for development:
    ```bash
    cd scripts/demo
    source env.sh
@@ -102,43 +165,78 @@ fabric-zakat/
 
 ### Testing
 
-Run the test script:
-```bash
-./04_test_chaincode.sh
-```
+1. **Run the test suite**:
+   ```bash
+   cd chaincode/zakat
+   go test -v
+   ```
 
-This will:
-- Create a test Zakat transaction
-- Query the transaction
-- Test endorsement policies
-
-### Cleanup
-
-To stop and clean up the network:
-```bash
-cd scripts/demo
-./00_cleanup.sh
-```
-
-### Troubleshooting
-
-- **Network Issues**: Ensure Docker is running and the correct network name is used.
-- **Path Issues**: Verify that `PROJECT_ROOT` is set correctly.
-- **Chaincode Errors**: Check Go environment and dependencies.
-
-### Advanced Configuration
-
-For custom configurations, modify the files in `config/dev/` and `config/prod/` to suit your environment needs.
+2. **Run the development network**:
+   ```bash
+   cd scripts/demo
+   ./demo.sh
+   ```
 
 ## Production Deployment
 
-For production environment:
+For production deployment:
 
-1. Use configs from `config/prod/`
-2. Update domain names in crypto-config
-3. Configure proper TLS certificates
-4. Set up proper access control
-5. Enable security features
+1. Follow Hyperledger Fabric's official guidelines for production networks
+2. Implement proper security measures:
+   - Configure TLS certificates
+   - Set up proper access control
+   - Enable security features
+   - Configure proper endorsement policies
+3. Perform security audits
+4. Set up monitoring and backup procedures
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- YDSF Malang
+- YDSF Jatim
+- Hyperledger Fabric Community
+
+## Release Notes (v1.0.0-rc1)
+
+### Features
+- Complete Zakat management functionality
+- Comprehensive validation and error handling
+- Full test coverage
+- Development and testing tools provided
+
+### Supported Organizations
+- YDSF Malang
+- YDSF Jatim
+
+### Requirements
+- Hyperledger Fabric 2.4.0+
+- Go 1.20+
+- Docker and Docker Compose
+
+### Status
+- Initial release candidate
+- Chaincode implementation complete
+- Development scripts provided
+- Pending production validation
+
+### Security Notes
+- Input validation for all parameters
+- Status transitions are strictly controlled
+- Organization validation enforced
+- Transaction integrity checks
+- Production hardening required
 
 ## Troubleshooting
 
@@ -194,15 +292,3 @@ docker network ls
 - [Network Setup Guide](NETWORK_SETUP.md)
 - [Configuration Guide](config/README.md)
 - [Scripts Documentation](scripts/README.md)
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

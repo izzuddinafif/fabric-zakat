@@ -1,23 +1,44 @@
-# Zakat Chaincode
+# Zakat Chaincode v1.0.0-rc1
 
 ## Overview
 This Hyperledger Fabric chaincode manages Zakat transactions for YDSF Malang and YDSF Jatim organizations. It provides a transparent and immutable record of Zakat collection and distribution.
+
+## Status
+This is a release candidate (RC) version with:
+- Feature-complete implementation
+- Comprehensive validation rules
+- Full test coverage
+- Error handling
+- Pending production validation
+
+## Features
+- Secure Zakat transaction management
+- Comprehensive validation rules
+- Full test coverage
+- Production-ready error handling
+- Support for multiple organizations
+- Transparent distribution tracking
+
+## Requirements
+- Hyperledger Fabric 2.4.0+
+- Go 1.20+
+- Docker and Docker Compose
 
 ## Data Model
 
 ### Zakat Transaction
 ```go
 type Zakat struct {
-    ID            string  // Format: ZKT-{ORG}-{YYYY}{MM}-{COUNTER}
-    Muzakki       string  // Zakat donor's name
-    Amount        float64 // Amount in IDR
-    Type          string  // "fitrah" or "maal"
-    Status        string  // "collected" or "distributed"
-    Organization  string  // Collecting organization
-    Timestamp     string  // ISO 8601 format
-    Mustahik      string  // Recipient's name (if distributed)
-    Distribution  float64 // Distributed amount
-    DistributedAt string  // Distribution timestamp (ISO 8601)
+    ID            string  `json:"ID"`           // Format: ZKT-ORG-YYYYMM-NNNN
+    Muzakki       string  `json:"muzakki"`      // Zakat donor's name
+    Amount        float64 `json:"amount"`       // Amount in IDR
+    Type          string  `json:"type"`         // "fitrah" or "maal"
+    Status        string  `json:"status"`       // "collected" or "distributed"
+    Organization  string  `json:"organization"` // Collecting organization
+    Timestamp     string  `json:"timestamp"`    // ISO 8601 format
+    Mustahik      string  `json:"mustahik"`     // Recipient's name (if distributed)
+    Distribution  float64 `json:"distribution"` // Distributed amount
+    DistributedAt string  `json:"distributedAt"`// Distribution timestamp (ISO 8601)
 }
 ```
 
@@ -93,96 +114,55 @@ The Zakat ID follows a specific format to ensure uniqueness and traceability:
 
 ## Validation Rules
 
-### ID Validation
-- Must follow the specified format
-- Organization part must match authorized organizations
-- Year and month must be valid
+### ID Format
+- Must follow pattern: `ZKT-{ORG}-{YYYY}{MM}-{COUNTER}`
+- Organization must be valid
+- Date components must be valid
 
-### Amount Validation
+### Amount
 - Must be positive number
-- Must be greater than zero
+- Must be greater than 0
+- Distribution amount cannot exceed original amount
 
-### Organization Validation
+### Organization
 - Must be either "YDSF Malang" or "YDSF Jatim"
+- Must be authorized in the network
 
-### Timestamp Validation
-- Must be in ISO 8601 format
-- Must be parseable as a valid date/time
-
-### Zakat Type Validation
+### Type
 - Must be either "maal" or "fitrah"
+- Cannot be changed after creation
+
+### Status
+- Automatically set to "collected" on creation
+- Changes to "distributed" after successful distribution
+- Cannot be manually modified
+
+### Timestamps
+- Must be in ISO 8601 format
+- Cannot be future dates
+- Distribution date must be after collection date
 
 ## Testing
 The chaincode includes comprehensive test coverage:
-- Unit tests for all functions
-- Error case testing
-- Mock implementations for chaincode interfaces
-- Validation testing
-- Edge case coverage
-
-## Error Handling
-All functions include proper error handling:
-- Descriptive error messages
-- Proper error propagation
-- Transaction rollback on errors
-- Validation error details
-
-## Dependencies
-- Hyperledger Fabric Contract API
-- Hyperledger Fabric Chaincode Go
-- Google Protocol Buffers
-- Testify (for testing)
-
-## Development
-- Go version: 1.20+
-- Uses standard Go modules
-- Follows Go best practices
-- Implements Hyperledger Fabric chaincode interfaces
+```bash
+cd chaincode/zakat
+go test -v
+```
 
 ## Security Considerations
 - Input validation for all parameters
-- Proper error handling
-- No sensitive data exposure
+- Status transitions are strictly controlled
+- Organization validation enforced
 - Transaction integrity checks
-- Organization authorization checks
-
-## Future Improvements
-- Additional validation rules
-- Enhanced error reporting
-- Performance optimizations
-- Additional query functions
-- Batch processing support
+- No direct status manipulation allowed
+- Timestamp validation to prevent future dating
 
 ## Transaction Flow
-1. Donor contributes Zakat via `AddZakat()`
-2. Organization tracks donation
-3. Beneficiary receives Zakat via `DistributeZakat()`
-4. Full transaction history maintained
+1. Organization receives Zakat via `AddZakat()`
+2. Transaction is recorded with "collected" status
+3. Organization distributes via `DistributeZakat()`
+4. Status updates to "distributed"
+5. Full history maintained on chain
 
-## Usage Example
-```bash
-# Add Zakat donation
-# Format: ZKT-YDSF-{MLG|JTM}-YYYYMM-NNNN
-peer chaincode invoke -C zakat-channel -n zakat -c '{"function":"AddZakat","Args":["ZKT-YDSF-MLG-202401-0001", "Ahmad", "5000000", "maal", "YDSF Malang", "2024-01-15T00:00:00Z"]}'
-
-# Distribute Zakat
-peer chaincode invoke -C zakat-channel -n zakat -c '{"function":"DistributeZakat","Args":["ZKT-YDSF-MLG-202401-0001", "Muhammad", "1000000", "2024-01-20T00:00:00Z"]}'
-
-# Query Zakat
-peer chaincode query -C zakat-channel -n zakat -c '{"function":"QueryZakat","Args":["ZKT-YDSF-MLG-202401-0001"]}'
-
-# Get All Zakat
-peer chaincode query -C zakat-channel -n zakat -c '{"function":"GetAllZakat","Args":[]}'
-
-```
-
-Note:
-- Zakat ID format: `ZKT-YDSF-{MLG|JTM}-YYYYMM-NNNN`
-  - MLG: YDSF Malang
-  - JTM: YDSF Jatim
-  - YYYYMM: Year and month
-  - NNNN: Sequential number
-- Timestamp format: ISO 8601 (e.g., `2024-01-15T00:00:00Z`)
-- Amount should be in IDR
-- Zakat type should be either "fitrah" or "maal"
-- Organization should be either "YDSF Malang" or "YDSF Jatim"
+## License
+This project is licensed under the MIT License - see the [LICENSE](../../LICENSE) file for details.

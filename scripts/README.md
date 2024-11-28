@@ -20,36 +20,38 @@ scripts/
 
 ## Development Scripts
 
+This directory contains scripts for development and testing of the Fabric Zakat network. 
+**Note: These scripts are intended for development and testing purposes only. For production deployment, follow Hyperledger Fabric's official guidelines.**
+
 ### Environment Setup (`env.sh`)
-- Sets up all required environment variables
+- Sets up required environment variables for development
 - Defines paths and configuration locations
-- Sets organization-specific variables
+- Sets organization-specific variables for testing
 
-### Running the Network
+### Running the Development Network
 
-To set up and run the entire Hyperledger Fabric Zakat network, simply use the `demo.sh` script:
+To set up and run the development network:
 
 ```bash
 ./demo.sh
 ```
 
-This single script handles all steps:
+This script handles development setup:
 - Cleaning up previous network
-- Generating network materials
-- Starting the network
-- Creating and joining the channel
+- Generating test materials
+- Starting development network
+- Creating and joining test channel
 - Deploying chaincode
-- Running initial tests
+- Running basic tests
 
 ### Docker Network
 
-The network is configured with the name `fabric_test`. This ensures consistent networking across all Hyperledger Fabric components during development and testing.
+The development network uses `fabric_test` as the Docker network name. This is for development consistency only and should be reconfigured for production.
 
 ## Development Directory
-The `dev` directory contains scripts and resources for setting up and testing the development environment. It includes `test_local.sh` for local testing and `cleanup.sh` for cleaning up the environment after tests.
-
-- **test_local.sh**: Script to set up and test the local development network.
-- **cleanup.sh**: Script to clean up Docker containers, networks, and volumes, and remove generated artifacts to reset the development environment.
+The `dev` directory contains development testing resources:
+- `test_local.sh`: Local development network testing
+- `cleanup.sh`: Development environment cleanup
 
 ## Temporary Files
 
@@ -92,3 +94,19 @@ Each script:
    - Check Go environment
    - Verify dependencies
    - Check package IDs
+
+## Important Notes
+
+1. These scripts are for development and testing only
+2. Not suitable for production deployment as-is
+3. Security features are minimal for development ease
+4. Production deployment requires:
+   - Proper security configuration
+   - Network hardening
+   - Access control setup
+   - Monitoring implementation
+   - Backup procedures
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.
