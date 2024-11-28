@@ -1,0 +1,55 @@
+# Generated crypto material and artifacts
+/organizations/
+/channel-artifacts/
+/system-genesis-block/
+/crypto-config/
+*.block
+
+# Environment and configuration
+/scripts/prod/
+/config/prod/
+*.env
+.env
+.env.*
+
+# Temporary files and build artifacts
+/scripts/temp/
+*.tar.gz
+*.tmp
+*.temp
+*~
+
+# Docker
+/docker/
+/volumes/
+
+# IDE and OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs and debug
+*.log
+/logs/
+npm-debug.log*
+
+# Build artifacts
+*.o
+*.a
+*.so
+/dist/
+/build/
+__pycache__/
+*.pyc
+
+# Go-related directories and files
+/chaincode/zakat/vendor/
+*.test
+*.exe
+*.out
+*.prof
+
+# Ignore Go module cache
+/chaincode/pkg/mod/

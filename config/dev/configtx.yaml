@@ -1,0 +1,175 @@
+Organizations:
+    - &OrdererOrg
+        Name: OrdererOrg
+        ID: OrdererMSP
+        MSPDir: ../../organizations/ordererOrganizations/example.local/msp
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('OrdererMSP.member')"
+            Writers:
+                Type: Signature
+                Rule: "OR('OrdererMSP.member')"
+            Admins:
+                Type: Signature
+                Rule: "OR('OrdererMSP.admin')"
+        OrdererEndpoints:
+            - orderer.example.local:7050
+
+    - &YDSFMalang
+        Name: YDSFMalangMSP
+        ID: YDSFMalangMSP
+        MSPDir: ../../organizations/peerOrganizations/ydsfmalang.example.local/msp
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('YDSFMalangMSP.admin', 'YDSFMalangMSP.peer', 'YDSFMalangMSP.client')"
+            Writers:
+                Type: Signature
+                Rule: "OR('YDSFMalangMSP.admin', 'YDSFMalangMSP.client')"
+            Admins:
+                Type: Signature
+                Rule: "OR('YDSFMalangMSP.admin')"
+            Endorsement:
+                Type: Signature
+                Rule: "OR('YDSFMalangMSP.peer')"
+        AnchorPeers:
+          - Host: peer0.ydsfmalang.example.local
+            Port: 7051
+
+    - &YDSFJatim
+        Name: YDSFJatimMSP
+        ID: YDSFJatimMSP
+        MSPDir: ../../organizations/peerOrganizations/ydsfjatim.example.local/msp
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('YDSFJatimMSP.admin', 'YDSFJatimMSP.peer', 'YDSFJatimMSP.client')"
+            Writers:
+                Type: Signature
+                Rule: "OR('YDSFJatimMSP.admin', 'YDSFJatimMSP.client')"
+            Admins:
+                Type: Signature
+                Rule: "OR('YDSFJatimMSP.admin')"
+            Endorsement:
+                Type: Signature
+                Rule: "OR('YDSFJatimMSP.peer')"
+        AnchorPeers:
+          - Host: peer0.ydsfjatim.example.local
+            Port: 8051
+
+Capabilities:
+    Channel: &ChannelCapabilities
+        V2_0: true
+    Orderer: &OrdererCapabilities
+        V2_0: true
+    Application: &ApplicationCapabilities
+        V2_0: true
+
+Application: &ApplicationDefaults
+    Organizations:
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: ImplicitMeta
+            Rule: "ANY Admins"
+        LifecycleEndorsement:
+            Type: ImplicitMeta
+            Rule: "ANY Endorsement"
+        Endorsement:
+            Type: ImplicitMeta
+            Rule: "ANY Endorsement"
+    Capabilities:
+        <<: *ApplicationCapabilities
+
+Orderer: &OrdererDefaults
+    OrdererType: etcdraft
+    Addresses:
+        - orderer.example.local:7050
+    BatchTimeout: 2s
+    BatchSize:
+        MaxMessageCount: 10
+        AbsoluteMaxBytes: 99 MB
+        PreferredMaxBytes: 512 KB
+    EtcdRaft:
+        Consenters:
+            - Host: orderer.example.local
+              Port: 7050
+              ClientTLSCert: ../../organizations/ordererOrganizations/example.local/orderers/orderer.example.local/tls/server.crt
+              ServerTLSCert: ../../organizations/ordererOrganizations/example.local/orderers/orderer.example.local/tls/server.crt
+    Organizations:
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Admins"
+        BlockValidation:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+    Capabilities:
+        <<: *OrdererCapabilities
+
+Channel: &ChannelDefaults
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Admins"
+    Capabilities:
+        <<: *ChannelCapabilities
+
+Profiles:
+    TwoOrgsOrdererGenesis:
+        <<: *ChannelDefaults
+        Orderer:
+            <<: *OrdererDefaults
+            Organizations:
+                - *OrdererOrg
+            Capabilities:
+                <<: *OrdererCapabilities
+        Consortiums:
+            ZakatConsortium:
+                Organizations:
+                    - *YDSFMalang
+                    - *YDSFJatim
+    TwoOrgsChannel:
+        Consortium: ZakatConsortium
+        <<: *ChannelDefaults
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+                - *YDSFMalang
+                - *YDSFJatim
+            Capabilities:
+                <<: *ApplicationCapabilities
+            Policies:
+                Readers:
+                    Type: ImplicitMeta
+                    Rule: "ANY Readers"
+                Writers:
+                    Type: ImplicitMeta
+                    Rule: "ANY Writers"
+                Admins:
+                    Type: ImplicitMeta
+                    Rule: "ANY Admins"
+                LifecycleEndorsement:
+                    Type: ImplicitMeta
+                    Rule: "ANY Endorsement"
+                Endorsement:
+                    Type: ImplicitMeta
+                    Rule: "ANY Endorsement"

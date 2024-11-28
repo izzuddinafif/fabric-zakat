@@ -1,0 +1,133 @@
+version: '2.1'
+
+volumes:
+  orderer.example.local:
+  peer0.ydsfmalang.example.local:
+  peer0.ydsfjatim.example.local:
+  gopath-peer0.ydsfmalang:
+  gocache-peer0.ydsfmalang:
+  gopath-peer0.ydsfjatim:
+  gocache-peer0.ydsfjatim:
+
+networks:
+  test:
+    name: fabric_test
+
+services:
+  orderer.example.local:
+    container_name: orderer.example.local
+    image: hyperledger/fabric-orderer:2.4
+    init: true
+    environment:
+      - FABRIC_LOGGING_SPEC=INFO
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_LISTENPORT=7050
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      - ORDERER_OPERATIONS_LISTENADDRESS=0.0.0.0:8443
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - ${PROJECT_ROOT}/system-genesis-block/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - ${PROJECT_ROOT}/organizations/ordererOrganizations/example.local/orderers/orderer.example.local/msp:/var/hyperledger/orderer/msp
+      - ${PROJECT_ROOT}/organizations/ordererOrganizations/example.local/orderers/orderer.example.local/tls:/var/hyperledger/orderer/tls
+      - orderer.example.local:/var/hyperledger/production/orderer
+    ports:
+      - 7050:7050
+      - 7443:8443
+    networks:
+      - test
+
+  peer0.ydsfmalang.example.local:
+    container_name: peer0.ydsfmalang.example.local
+    image: hyperledger/fabric-peer:2.4
+    init: true
+    environment:
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=fabric_test
+      - FABRIC_LOGGING_SPEC=INFO
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_PROFILE_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
+      - CORE_PEER_ID=peer0.ydsfmalang.example.local
+      - CORE_PEER_ADDRESS=peer0.ydsfmalang.example.local:7051
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
+      - CORE_PEER_CHAINCODEADDRESS=peer0.ydsfmalang.example.local:7052
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.ydsfmalang.example.local:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.ydsfmalang.example.local:7051
+      - CORE_PEER_LOCALMSPID=YDSFMalangMSP
+      - CORE_CHAINCODE_BUILDER=hyperledger/fabric-ccenv:2.4
+      - CORE_CHAINCODE_GOLANG_RUNTIME=hyperledger/fabric-baseos:2.4
+      - CORE_CHAINCODE_LOGGING_LEVEL=DEBUG
+      - CORE_CHAINCODE_LOGGING_SHIM=DEBUG
+      - CORE_CHAINCODE_MODE=net
+      - CORE_VM_DOCKER_ATTACHSTDOUT=true
+      - CORE_OPERATIONS_LISTENADDRESS=0.0.0.0:17051
+    volumes:
+      - /var/run/docker.sock:/host/var/run/docker.sock
+      - ${PROJECT_ROOT}/organizations/peerOrganizations/ydsfmalang.example.local/peers/peer0.ydsfmalang.example.local/msp:/etc/hyperledger/fabric/msp
+      - ${PROJECT_ROOT}/organizations/peerOrganizations/ydsfmalang.example.local/peers/peer0.ydsfmalang.example.local/tls:/etc/hyperledger/fabric/tls
+      - peer0.ydsfmalang.example.local:/var/hyperledger/production
+      - gopath-peer0.ydsfmalang:/opt/gopath
+      - gocache-peer0.ydsfmalang:/opt/gocache
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: peer node start
+    ports:
+      - 7051:7051
+      - 7052:7052
+      - 17051:17051
+    networks:
+      - test
+
+  peer0.ydsfjatim.example.local:
+    container_name: peer0.ydsfjatim.example.local
+    image: hyperledger/fabric-peer:2.4
+    init: true
+    environment:
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=fabric_test
+      - FABRIC_LOGGING_SPEC=INFO
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_PROFILE_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
+      - CORE_PEER_ID=peer0.ydsfjatim.example.local
+      - CORE_PEER_ADDRESS=peer0.ydsfjatim.example.local:8051
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:8051
+      - CORE_PEER_CHAINCODEADDRESS=peer0.ydsfjatim.example.local:8052
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:8052
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.ydsfjatim.example.local:8051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.ydsfjatim.example.local:8051
+      - CORE_PEER_LOCALMSPID=YDSFJatimMSP
+      - CORE_CHAINCODE_BUILDER=hyperledger/fabric-ccenv:2.4
+      - CORE_CHAINCODE_GOLANG_RUNTIME=hyperledger/fabric-baseos:2.4
+      - CORE_CHAINCODE_LOGGING_LEVEL=DEBUG
+      - CORE_CHAINCODE_LOGGING_SHIM=DEBUG
+      - CORE_CHAINCODE_MODE=net
+      - CORE_VM_DOCKER_ATTACHSTDOUT=true
+      - CORE_OPERATIONS_LISTENADDRESS=0.0.0.0:18051
+    volumes:
+      - /var/run/docker.sock:/host/var/run/docker.sock
+      - ${PROJECT_ROOT}/organizations/peerOrganizations/ydsfjatim.example.local/peers/peer0.ydsfjatim.example.local/msp:/etc/hyperledger/fabric/msp
+      - ${PROJECT_ROOT}/organizations/peerOrganizations/ydsfjatim.example.local/peers/peer0.ydsfjatim.example.local/tls:/etc/hyperledger/fabric/tls
+      - peer0.ydsfjatim.example.local:/var/hyperledger/production
+      - gopath-peer0.ydsfjatim:/opt/gopath
+      - gocache-peer0.ydsfjatim:/opt/gocache
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: peer node start
+    ports:
+      - 8051:8051
+      - 8052:8052
+      - 18051:18051
+    networks:
+      - test
