@@ -53,3 +53,5 @@ __pycache__/
 
 # Ignore Go module cache
 /chaincode/pkg/mod/
+
+/scripts/dev/test_local.sh
