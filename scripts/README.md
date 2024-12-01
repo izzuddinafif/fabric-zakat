@@ -50,7 +50,6 @@ The development network uses `fabric_test` as the Docker network name. This is f
 
 ## Development Directory
 The `dev` directory contains development testing resources:
-- `test_local.sh`: Local development network testing
 - `cleanup.sh`: Development environment cleanup
 
 ## Temporary Files
